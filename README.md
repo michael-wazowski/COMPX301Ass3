@@ -1,1 +1,1 @@
-# COMPX301Ass3
+GitHub repository for COMPX301 assignment 3, KMP string search implementation
