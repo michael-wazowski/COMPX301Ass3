@@ -1,4 +1,6 @@
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -8,7 +10,7 @@ class KMPtable {
     // e.g. : java KMPtable xyxyz
     public static void main(String[] args) {
         
-        String searchString = args[0]; // getting string to search for
+        String searchString = args[0].toLowerCase(); // getting string to search for
 
         ArrayList<String> uniqueChars = getUniqueChars(searchString); // Getting all unique characters in pattern
 
@@ -33,10 +35,13 @@ class KMPtable {
             rowPointer++; // increment row pointer
         }
 
-        // Output KMP table to standard output
+        // Output KMP table to file <pattern>.kmp
         try {
+            // file and filewriter obj
+            File file = new File(searchString+".kmp");
+            FileWriter fw = new FileWriter(file);
             // writer object
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
+            BufferedWriter writer = new BufferedWriter(fw);
             writer.write("  "); // write spacer characters for top row header
             for (int i=0; i<searchString.length(); i++) { // loop through pattern
                 writer.write(searchString.substring(i, i+1)+" "); // writer each character spaced
@@ -54,6 +59,7 @@ class KMPtable {
                 writer.newLine(); // go to new line
                 writer.flush(); // flush to output
             }
+            writer.close();
         } catch (IOException e) { // in case there is somehow an error
             
         }

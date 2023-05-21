@@ -6,11 +6,11 @@ import java.util.Scanner;
 public class KMPsearch {
     public static void main(String[] args){
         try{  
-            int tracker =0; 
             File f = new File(args[0]);
             //  File f = new File("table.txt");
             Scanner kmpScanner =  new Scanner(f);
-            ArrayList<String> pattern =  new ArrayList<String>(Arrays.asList(kmpScanner.nextLine().split(" ")));
+            String patternString = kmpScanner.nextLine();
+            ArrayList<String> pattern =  new ArrayList<String>(Arrays.asList(patternString.split(" ")));
             pattern.removeAll(Arrays.asList("", null));
 
 
@@ -23,49 +23,47 @@ public class KMPsearch {
             while(kmpScanner.hasNextLine()) {
                 row = kmpScanner.nextLine().split(" ");
                 foundChars.add(row[0]);
-                rowList.add(row);
+                rowList.add(Arrays.copyOfRange(row,1,row.length));
             }
 
             kmpScanner.close();
-            //  Scanner sc = new Scanner(new File("rubbish.txt"));
-            Scanner sc = new Scanner(new File(args[1]));
-     
-            int foundCharIndex =0;
-            boolean matched = false;
-            char [] inputStr;
-            while(sc.hasNextLine() && !matched){ //read each line in the source file 
-                tracker++;
-                int pointer=0; //Points to where we are in the pattern
-                inputStr = sc.nextLine().toCharArray(); //turn line into a char Array
-                // System.out.println(Arrays.toString(inputStr));
-                for (int i = 0; i < inputStr.length; i++) { //loop into the characters of the line
-                    //check that pattern are source are equal 
-                    if(pattern.get(pointer).equals(String.valueOf(inputStr[i]))){ //check if the character matches to the pattern
-                        pointer++;
-                        if(pointer ==1){
-                            foundCharIndex = i+1;
-                        }
-                    }else{
-                        int foundVal;
-                        //need to know if the character is in found chars 
-                        if(foundChars.contains(String.valueOf(inputStr[i]))){
-                            foundVal = foundChars.indexOf(String.valueOf(inputStr[i]));
-                        }else{
-                            foundVal = foundChars.indexOf("*");
-                        }
-                        String[] valString = rowList.get(foundVal);
-                        int shiftVal = Integer.valueOf(valString[pointer+1]);
-                        i += shiftVal;
-                    }
-                    if(pointer == pattern.size()){
-                        System.out.println(tracker + " "+foundCharIndex);
-                        matched = true;
-                        break;
-                    }
-                } 
-            }
-             sc.close();
 
+            Scanner sc = new Scanner(new File(args[1])); // scanner to read through target source
+     
+            int foundCharIndex = 0; // holds index of mismatched char
+            boolean matched = false; // whether string search has matched
+            String inputStr; // string to hold each line from target source
+            String[] shiftVals; // array to get shift vals for when it's necessary
+            int tracker = 0; // tracks lines read
+            int pointer; // points to place in pattern
+
+            while (sc.hasNextLine() && !matched) { // read each line in source file
+                tracker++; // inc tracker
+                pointer = 0;
+                inputStr = sc.nextLine().toLowerCase(); // read line from target file 
+                for (int i = 0; i<inputStr.length(); i++) { // loop through characters of the line
+                    if (pattern.get(pointer).equals(String.valueOf(inputStr.charAt(i)))) { // check that the pattern and source are equal
+                        pointer++; // increment pointer to compare rest of pattern
+                    } else {
+                        foundCharIndex = foundChars.indexOf(String.valueOf(inputStr.charAt(i))); // get index in array of chars
+                        if (foundCharIndex == -1) { // if char is not in array
+                            foundCharIndex = foundChars.indexOf("*"); // index all non-pattern characters  
+                        }
+                        shiftVals = rowList.get(foundCharIndex); // get array of shift values for corresponding char
+                        pointer -= Integer.parseInt(shiftVals[pointer]); // shift pointer
+                        if (pointer < 0) { // if pointer is less than 0
+                            pointer = 0; // fix to 0
+                        }
+                    }
+                    if (pointer == pattern.size()) { // if pointer is pattern size, we have a match
+                        // output success
+                        System.out.println(tracker + " " + ((i+2)-pattern.size())); // output line and column number
+                        matched=true; // set matched to true
+                        break; // break from for loop
+                    }
+                }
+            }
+            sc.close(); //close file scanner
         } catch (Exception e) {
             // TODO: handle exception
             e.printStackTrace();
